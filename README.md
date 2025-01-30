@@ -2,6 +2,12 @@
 
 An AI-powered medical diagnosis system that helps healthcare professionals analyze patient data and generate comprehensive medical reports. Built with Next.js, Firebase, and GROQ API.
 
+Created by Harsh Gajjar
+
+- GitHub: [@harshgajjar7110](https://github.com/harshhh28)
+- LinkedIn: [harsh-gajjar](https://linkedin.com/in/harsh-gajjar-936536209)
+- Twitter: [@harshgajjar7110](https://twitter.com/harshgajjar_28)
+
 ## Features
 
 - 🏥 Patient Information Collection

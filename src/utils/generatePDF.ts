@@ -1,146 +1,112 @@
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 export const generatePDF = async (elementId: string, filename: string) => {
   const element = document.getElementById(elementId);
   if (!element) return;
 
-  // Add print-specific styles
-  const style = document.createElement("style");
-  style.innerHTML = `
-    @media print {
-      #report-content {
-        padding: 30mm 20mm !important;
-        background-color: white !important;
-      }
-      
-      /* Improved header styling */
-      .bg-gradient-to-r {
-        background: linear-gradient(to right, #1e40af, #2563eb) !important;
-        padding: 1.5rem !important;
-        border-radius: 8px !important;
-        margin-bottom: 2rem !important;
-      }
-      
-      /* Better text contrast */
-      .text-blue-100 {
-        color: #e5e7eb !important;
-      }
-      
-      /* Enhanced diagnosis box */
-      .bg-blue-50 {
-        background-color: #f0f7ff !important;
-        border: 2px solid #bfdbfe !important;
-        border-radius: 8px !important;
-        padding: 1.5rem !important;
-        margin: 1.5rem 0 !important;
-      }
-      
-      /* Improved typography */
-      h1 {
-        font-size: 24px !important;
-        margin-bottom: 0.5rem !important;
-      }
-      
-      h2 {
-        font-size: 20px !important;
-        color: #1e40af !important;
-        margin-bottom: 1rem !important;
-      }
-      
-      p {
-        line-height: 1.6 !important;
-        margin-bottom: 0.5rem !important;
-      }
-      
-      /* Better spacing */
-      .space-y-4 {
-        margin-top: 1rem !important;
-      }
-      
-      /* Clean up shadows and borders */
-      .shadow-lg, .shadow-sm {
-        box-shadow: none !important;
-      }
-      
-      /* Report details styling */
-      dl {
-        margin-top: 2rem !important;
-        padding-top: 1rem !important;
-        border-top: 1px solid #e5e7eb !important;
-      }
-      
-      dt {
-        color: #6b7280 !important;
-        font-size: 0.875rem !important;
-      }
-      
-      dd {
-        color: #111827 !important;
-        font-size: 0.875rem !important;
-        margin-top: 0.25rem !important;
-      }
-      
-      /* Remove unnecessary backgrounds */
-      .bg-white {
-        background-color: transparent !important;
-      }
-      
-      /* Page break control */
-      .print-break {
-        page-break-before: always !important;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-    backgroundColor: "#ffffff",
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
-    onclone: (clonedDoc) => {
-      const clonedElement = clonedDoc.getElementById(elementId);
-      if (clonedElement) {
-        clonedElement.style.padding = "30mm 20mm";
-      }
-    },
-  });
-
-  const imgData = canvas.toDataURL("image/png", 1.0);
   const pdf = new jsPDF({
     orientation: "portrait",
     unit: "mm",
     format: "a4",
-    compress: true,
   });
 
+  // Set font
+  pdf.setFont("helvetica");
+
+  // Page dimensions
   const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 0; // Removed margins since we handle them in CSS
+  const margin = 20;
+  const usableWidth = pageWidth - 2 * margin;
 
-  const imgWidth = pageWidth - 2 * margin;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  // Starting position
+  let yPosition = 20;
 
-  let heightLeft = imgHeight;
-  let position = 0;
+  // Add header
+  pdf.setFontSize(24);
+  pdf.setTextColor(29, 64, 175); // blue-600
+  pdf.text("Medical Diagnosis Report", margin, yPosition);
+  yPosition += 10;
 
-  // First page
-  pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  // Additional pages if needed
-  while (heightLeft >= 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+  // Add date
+  const dateElement = element.querySelector(".text-sm");
+  if (dateElement) {
+    pdf.setFontSize(12);
+    pdf.setTextColor(107, 114, 128); // gray-500
+    pdf.text(dateElement.textContent || "", margin, yPosition);
   }
+  yPosition += 15;
 
-  // Cleanup
-  document.head.removeChild(style);
+  // Add medical analysis
+  pdf.setFontSize(18);
+  pdf.setTextColor(31, 41, 55); // gray-900
+  pdf.text("Medical Analysis", margin, yPosition);
+  yPosition += 10;
+
+  // Add diagnosis content
+  const diagnosisContent = element.querySelectorAll(".text-gray-700");
+  pdf.setFontSize(12);
+  pdf.setTextColor(55, 65, 81); // gray-700
+
+  diagnosisContent.forEach((content) => {
+    const text = content.textContent || "";
+    const lines = pdf.splitTextToSize(text, usableWidth);
+
+    lines.forEach((line: string) => {
+      if (yPosition > 270) {
+        // Check if we need a new page
+        pdf.addPage();
+        yPosition = 20;
+      }
+      pdf.text(line, margin, yPosition);
+      yPosition += 6;
+    });
+  });
+
+  // Add report details
+  yPosition += 10;
+  pdf.setFontSize(14);
+  pdf.setTextColor(31, 41, 55); // gray-900
+  pdf.text("Report Details", margin, yPosition);
+  yPosition += 10;
+
+  // Add IDs
+  const reportId = element.querySelector(".font-mono")?.textContent;
+  const patientId = element.querySelectorAll(".font-mono")[1]?.textContent;
+
+  pdf.setFontSize(10);
+  pdf.text(`Report ID: ${reportId || ""}`, margin, yPosition);
+  pdf.text(
+    `Patient ID: ${patientId || ""}`,
+    pageWidth - margin - 60,
+    yPosition
+  );
+  yPosition += 15;
+
+  // Add footer
+  pdf.setFontSize(10);
+  pdf.setTextColor(107, 114, 128); // gray-500
+  pdf.text("Disclaimer: This is an AI-generated report.", margin, yPosition);
+  yPosition += 5;
+  pdf.text("Created by Harsh Gajjar", margin, yPosition);
+  yPosition += 10;
+
+  // Add clickable links
+  const linkY = yPosition;
+  const linkSpacing = 30;
+
+  pdf.setTextColor(75, 85, 99); // gray-600
+  pdf.link(margin, linkY - 5, 20, 5, { url: "https://github.com/harshhh28" });
+  pdf.text("GitHub", margin, linkY);
+
+  pdf.link(margin + linkSpacing, linkY - 5, 30, 5, {
+    url: "https://linkedin.com/in/harsh-gajjar-936536209",
+  });
+  pdf.text("LinkedIn", margin + linkSpacing, linkY);
+
+  pdf.link(margin + linkSpacing * 2, linkY - 5, 25, 5, {
+    url: "https://twitter.com/harshgajjar_28",
+  });
+  pdf.text("Twitter", margin + linkSpacing * 2, linkY);
 
   pdf.save(`${filename}.pdf`);
 };

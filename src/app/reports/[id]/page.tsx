@@ -174,6 +174,32 @@ export default function ReportPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 italic">
                   Disclaimer: This is an AI-generated report.
                 </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Created by Harsh Gajjar
+                </p>
+                <div className="flex justify-center space-x-4 mt-2">
+                  <a
+                    href="https://github.com/harshhh28"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-600">
+                    GitHub
+                  </a>
+                  <a
+                    href="https://linkedin.com/in/harsh-gajjar-936536209"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-600">
+                    LinkedIn
+                  </a>
+                  <a
+                    href="https://twitter.com/harshgajjar_28"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-600">
+                    Twitter
+                  </a>
+                </div>
               </div>
             </div>
           </div>
