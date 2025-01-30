@@ -150,6 +150,7 @@ export async function POST(req: Request) {
  * @param systemPrompt - Specialist-specific prompt template
  * @returns Analysis text from the AI model
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateSpecialtyAnalysis(data: any, systemPrompt: string) {
   const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
