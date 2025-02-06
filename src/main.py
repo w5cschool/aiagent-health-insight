@@ -3,6 +3,7 @@ from config.prompts import SPECIALIST_PROMPTS
 from services.ai_service import generate_analysis
 import pdfplumber
 from io import BytesIO
+from datetime import datetime
 
 def extract_text_from_pdf(pdf_file):
     text = ""
@@ -75,7 +76,8 @@ def main():
         age = st.number_input("Age", min_value=0, max_value=120)
     with col2:
         gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-        date_of_report = st.date_input("Date of Report")
+        current_date = datetime.now().strftime("%d/%m/%Y")
+        st.text_input("Date of Report", value=current_date, disabled=True)
 
     # Blood Report Upload
     st.header("Blood Report")
@@ -97,7 +99,7 @@ def main():
                     "patient_name": patient_name,
                     "age": age,
                     "gender": gender,
-                    "date_of_report": date_of_report.strftime("%Y-%m-%d"),
+                    "date_of_report": current_date,
                     "blood_report": pdf_contents
                 }
                 
@@ -112,9 +114,25 @@ def main():
                 st.download_button(
                     label="Download Analysis Report",
                     data=analysis,
-                    file_name=f"blood_report_analysis_{patient_name}_{date_of_report}.txt",
+                    file_name=f"blood_report_analysis_{patient_name}_{current_date}.txt",
                     mime="text/plain"
                 )
+
+    # Add footer
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style='text-align: center; color: #666; padding: 20px;'>
+            <p>Created with ❤️ by Harsh Gajjar</p>
+            <p>
+                <a href="https://github.com/harshhh28" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">GitHub</a> |
+                <a href="https://linkedin.com/in/harsh-gajjar-936536209" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">LinkedIn</a> |
+                <a href="https://twitter.com/harshgajjar_28" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">Twitter</a>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 if __name__ == "__main__":
     main() 
