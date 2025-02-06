@@ -4,10 +4,18 @@ An AI-powered medical diagnosis system that provides specialist analyses using t
 
 ## Features
 
-- Multi-specialist analysis (Cardiologist, Pulmonologist, Psychologist)
 - Vital signs monitoring
-- Symptom tracking
 - Comprehensive final diagnosis
+- PDF report analysis and text extraction
+- Downloadable analysis reports
+- Modern web interface with Streamlit
+
+## Technical Stack
+
+- **AI/ML**: Groq LLM API (llama-3.3-70b-versatile model)
+- **Backend**: Python, Streamlit
+- **PDF Processing**: pdfplumber, PyPDF2
+- **Development**: VS Code Dev Containers support
 
 ## Setup
 
