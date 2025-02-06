@@ -33,6 +33,8 @@ An AI-powered medical diagnosis system that provides specialist analyses using t
 │   ├── utils/
 │   │   ├── validators.py
 │   └── main.py
+├── .devcontainer/
+│   └── devcontainer.json
 ├── requirements.txt
 ├── .gitignore
 ├── .streamlit/
