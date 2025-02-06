@@ -1,6 +1,7 @@
 import streamlit as st
 from config.prompts import SPECIALIST_PROMPTS
 from services.ai_service import generate_analysis
+from config.sample_data import SAMPLE_REPORT
 import pdfplumber
 from io import BytesIO
 from datetime import datetime
@@ -16,7 +17,11 @@ def extract_text_from_pdf(pdf_file):
         return f"Error extracting text from PDF: {str(e)}"
 
 def main():
-    st.set_page_config(page_title="Blood Report Analysis System", layout="wide")
+    st.set_page_config(
+        page_title="Blood Report Analysis System",
+        page_icon="🩺",
+        layout="wide"
+    )
     
     # Sidebar
     st.markdown("""
@@ -81,16 +86,22 @@ def main():
 
     # Blood Report Upload
     st.header("Blood Report")
-    uploaded_file = st.file_uploader("Upload your blood report PDF", type=['pdf'])
-    
-    if uploaded_file is not None:
-        pdf_contents = extract_text_from_pdf(uploaded_file)
-        with st.expander("View Extracted Report Contents"):
+    use_sample = st.checkbox("Use sample report for testing")
+    if use_sample:
+        pdf_contents = SAMPLE_REPORT
+        with st.expander("View Sample Report Contents"):
             st.text(pdf_contents)
-    
+    else:
+        uploaded_file = st.file_uploader("Upload your blood report PDF", type=['pdf'])
+        
+        if uploaded_file is not None:
+            pdf_contents = extract_text_from_pdf(uploaded_file)
+            with st.expander("View Extracted Report Contents"):
+                st.text(pdf_contents)
+
     if st.button("Analyze Report"):
-        if uploaded_file is None:
-            st.error("Please upload a blood report PDF")
+        if not use_sample and uploaded_file is None:
+            st.error("Please upload a blood report PDF or use the sample report")
         elif not patient_name or not age or not gender:
             st.error("Please fill in all patient information")
         else:
