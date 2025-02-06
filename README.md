@@ -27,13 +27,10 @@ An AI-powered medical diagnosis system that provides specialist analyses using t
 ```
 ├── src/
 │   ├── config/
-│   │   ├── __init__.py
 │   │   └── prompts.py
 │   ├── services/
-│   │   ├── __init__.py
 │   │   ├── ai_service.py
 │   ├── utils/
-│   │   ├── __init__.py
 │   │   ├── validators.py
 │   └── main.py
 ├── requirements.txt
