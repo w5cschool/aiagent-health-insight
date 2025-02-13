@@ -1,149 +1,85 @@
 import streamlit as st
-from config.prompts import SPECIALIST_PROMPTS
-from services.ai_service import generate_analysis
-from config.sample_data import SAMPLE_REPORT
-import pdfplumber
-from io import BytesIO
-from datetime import datetime
+from auth.session_manager import SessionManager
+from components.auth_pages import show_login_page  # Updated import
+from components.sidebar import show_sidebar
+from components.analysis_form import show_analysis_form
+from components.footer import show_footer  # Add this import
+from config.app_config import APP_NAME, APP_TAGLINE
 
-def extract_text_from_pdf(pdf_file):
-    text = ""
-    try:
-        with pdfplumber.open(pdf_file) as pdf:
-            for page in pdf.pages:
-                text += page.extract_text() + "\n"
-        return text
-    except Exception as e:
-        return f"Error extracting text from PDF: {str(e)}"
+# Must be the first Streamlit command
+st.set_page_config(
+    page_title="HIA - Health Insights Agent",
+    page_icon="🩺",
+    layout="wide"
+)
 
-def main():
-    st.set_page_config(
-        page_title="Blood Report Analysis System",
-        page_icon="🩺",
-        layout="wide"
-    )
-    
-    # Sidebar
-    st.markdown("""
-        <style>
-        .sidebar .sidebar-content {
-            background-image: linear-gradient(#2e7bcf,#2e7bcf);
-            color: white;
-        }
-        .sidebar-content a {
-            color: #ffffff !important;
-            text-decoration: none;
-            padding: 8px 0;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-        .sidebar-content a:hover {
-            transform: translateX(5px);
-            text-decoration: none;
-        }
-        .sidebar-content img {
-            border-radius: 50%;
-            margin: 20px 0;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    # Sidebar
-    with st.sidebar:
-        st.title("🩺 About")
-        st.markdown("---")
-        st.markdown("### 👨‍💻 Created by Harsh Gajjar")
-        st.markdown("#### 🔗 Connect with me")
-        
-        cols = st.columns(3)
-        with cols[0]:
-            st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/harshhh28)")
-        with cols[1]:
-            st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/harsh-gajjar-936536209)")
-        with cols[2]:
-            st.markdown("[![Twitter](https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/harshgajjar_28)")
-        
-        st.markdown("---")
-        st.markdown("### 📊 Project Stats")
-        st.markdown("- 🔬 AI-Powered Analysis")
-        st.markdown("- 📄 PDF Report Support")
-        st.markdown("- 🏥 Medical Insights")
-    
-    # Main content
-    st.title("Blood Report Analysis System")
-    
-    # Basic Patient Info
-    st.header("Patient Information")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        patient_name = st.text_input("Patient Name")
-        age = st.number_input("Age", min_value=0, max_value=120)
-    with col2:
-        gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-        current_date = datetime.now().strftime("%d/%m/%Y")
-        st.text_input("Date of Report", value=current_date, disabled=True)
-
-    # Blood Report Upload
-    st.header("Blood Report")
-    use_sample = st.checkbox("Use sample report for testing")
-    if use_sample:
-        pdf_contents = SAMPLE_REPORT
-        with st.expander("View Sample Report Contents"):
-            st.text(pdf_contents)
-    else:
-        uploaded_file = st.file_uploader("Upload your blood report PDF", type=['pdf'])
-        
-        if uploaded_file is not None:
-            pdf_contents = extract_text_from_pdf(uploaded_file)
-            with st.expander("View Extracted Report Contents"):
-                st.text(pdf_contents)
-
-    if st.button("Analyze Report"):
-        if not use_sample and uploaded_file is None:
-            st.error("Please upload a blood report PDF or use the sample report")
-        elif not patient_name or not age or not gender:
-            st.error("Please fill in all patient information")
-        else:
-            with st.spinner("Analyzing blood report..."):
-                patient_data = {
-                    "patient_name": patient_name,
-                    "age": age,
-                    "gender": gender,
-                    "date_of_report": current_date,
-                    "blood_report": pdf_contents
-                }
-                
-                # Generate comprehensive analysis
-                analysis = generate_analysis(patient_data, SPECIALIST_PROMPTS["comprehensive_analyst"])
-                
-                # Display results
-                st.header("Analysis Results")
-                st.markdown(analysis)
-                
-                # Add a download button for the report
-                st.download_button(
-                    label="Download Analysis Report",
-                    data=analysis,
-                    file_name=f"blood_report_analysis_{patient_name}_{current_date}.txt",
-                    mime="text/plain"
-                )
-
-    # Add footer
-    st.markdown("---")
+def show_welcome_screen():
     st.markdown(
-        """
-        <div style='text-align: center; color: #666; padding: 20px;'>
-            <p>Created with ❤️ by Harsh Gajjar</p>
-            <p>
-                <a href="https://github.com/harshhh28" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">GitHub</a> |
-                <a href="https://linkedin.com/in/harsh-gajjar-936536209" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">LinkedIn</a> |
-                <a href="https://twitter.com/harshgajjar_28" target="_blank" style="color: #666; text-decoration: none; margin: 0 10px;">Twitter</a>
-            </p>
+        f"""
+        <div style='text-align: center; padding: 50px;'>
+            <h2>Welcome to {APP_NAME}</h2>
+            <p style='font-size: 1.2em; color: #666;'>{APP_TAGLINE}</p>
+            <p>Start by creating a new analysis session</p>
         </div>
         """,
         unsafe_allow_html=True
     )
+    
+    col1, col2, col3 = st.columns([2, 3, 2])
+    with col2:
+        if st.button("➕ Create New Analysis Session", use_container_width=True, type="primary"):
+            success, session = SessionManager.create_chat_session()
+            if success:
+                st.session_state.current_session = session
+                st.rerun()
+            else:
+                st.error("Failed to create session")
+
+def show_chat_history():
+    success, messages = st.session_state.auth_service.get_session_messages(
+        st.session_state.current_session['id']
+    )
+    
+    if success:
+        for msg in messages:
+            if msg['role'] == 'user':
+                st.info(msg['content'])
+            else:
+                st.success(msg['content'])
+
+def show_user_greeting():
+    if st.session_state.user:
+        # Get name from user data, fallback to email if name is empty
+        display_name = st.session_state.user.get('name') or st.session_state.user.get('email', '')
+        st.markdown(f"""
+            <div style='text-align: right; padding: 1rem; color: #64B5F6; font-size: 1.1em;'>
+                👋 Hi, {display_name}
+            </div>
+        """, unsafe_allow_html=True)
+
+def main():
+    SessionManager.init_session()
+
+    if not SessionManager.is_authenticated():
+        show_login_page()
+        show_footer()  # Show footer at bottom for login page
+        return
+
+    # Show user greeting at the top
+    show_user_greeting()
+    
+    # Show sidebar
+    show_sidebar()
+
+    # Main chat area
+    if st.session_state.get('current_session'):
+        st.title(f"📊 {st.session_state.current_session['title']}")
+        show_chat_history()
+        show_analysis_form()
+    else:
+        show_welcome_screen()
+    
+    # Remove footer from main content when logged in since it's in sidebar
 
 if __name__ == "__main__":
-    main() 
+    main()
