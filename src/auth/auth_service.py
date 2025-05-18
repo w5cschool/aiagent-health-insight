@@ -121,7 +121,7 @@ class AuthService:
     def create_session(self, user_id, title=None):
         try:
             current_time = datetime.now()
-            default_title = f"{current_time.strftime("%d-%m-%Y")} | {current_time.strftime("%H:%M:%S")}"
+            default_title = f'{current_time.strftime("%d-%m-%Y")} | {current_time.strftime("%H:%M:%S")}'
             
             session_data = {
                 'user_id': user_id,
@@ -129,7 +129,13 @@ class AuthService:
                 'created_at': current_time.isoformat()
             }
             result = self.supabase.table('chat_sessions').insert(session_data).execute()
-            return True, result.data[0] if result.data else None
+            if result.data and isinstance(result.data, list) and len(result.data) > 0:
+                print("Insert succeeded but returned no data. Raw result:", result)
+                st.write("Insert succeeded but returned no data. Raw result:",result)
+
+                return True, result.data[0]
+            else:
+                return False, "Session insert succeeded but returned no data"
         except Exception as e:
             return False, str(e)
 

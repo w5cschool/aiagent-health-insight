@@ -49,12 +49,21 @@ class SessionManager:
     
     @staticmethod
     def create_chat_session():
-        """Create a new chat session."""
+        st.write("Creating chat session")
+        st.write("User:", st.session_state.get("user"))
+        
         if not SessionManager.is_authenticated():
+            st.write("Not authenticated")
             return False, "Not authenticated"
-        return st.session_state.auth_service.create_session(
-            st.session_state.user['id']
-        )
+        
+        auth_service = st.session_state.get("auth_service")
+                
+        if not auth_service:
+            return False, "Missing auth service"
+        
+        success, session = auth_service.create_session(st.session_state.user['id'])
+        
+        return success, session
     
     @staticmethod
     def get_user_sessions():

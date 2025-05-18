@@ -90,6 +90,13 @@ def main():
         st.title(f"📊 {st.session_state.current_session['title']}")
         show_chat_history()
         show_analysis_form()
+        
+        if st.session_state.get("analysis_result"):
+            result = st.session_state.analysis_result
+            if "error" in result:
+                st.error(result["error"])
+            else:
+                st.success(result["content"])
     else:
         show_welcome_screen()
 

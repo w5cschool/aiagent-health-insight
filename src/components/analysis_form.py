@@ -98,6 +98,9 @@ def handle_form_submission(patient_name, age, gender, pdf_contents):
         }, SPECIALIST_PROMPTS["comprehensive_analyst"])
         
         if result["success"]:
+            # st.write("result:", result)
+            st.session_state.analysis_result = result
+
             # Add model used information if available
             content = result["content"]
             if "model_used" in result:
@@ -109,7 +112,8 @@ def handle_form_submission(patient_name, age, gender, pdf_contents):
                 content,
                 role='assistant'
             )
-            st.rerun()
+            # st.rerun()
         else:
+            # st.write("result:", result)
             st.error(result["error"])
             st.stop()
